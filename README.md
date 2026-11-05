@@ -106,3 +106,7 @@ Para atualizar, substitua o `index.html`. O progresso salvo no navegador continu
 - **Atualização:** o site não acompanha retificações sozinho. Confira sempre as páginas oficiais dos concursos.
 
 Este é um projeto pessoal de estudo, sem vínculo com as bancas, os órgãos ou os cursos preparatórios mencionados.
+
+---
+
+Desenvolvido por Rodrigo Terroso Junior. O Claude, da Anthropic, foi usado como ferramenta durante o desenvolvimento.
