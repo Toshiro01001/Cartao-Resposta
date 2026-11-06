@@ -136,6 +136,37 @@ const conferir = (c, m) => { c ? oks++ : falhas.push(m); console.log((c ? 'ok   
     await pg.context().close();
   }
 
+  // Contorno de foco visível, inclusive onde a caixa cortava, e tabelas roláveis pelo teclado.
+  {
+    const pg = await abrir({ viewport: { width: 320, height: 640 } }, true), r = JSON.parse(ref).perfis.rodrigo;
+    await ir(pg, 'desempenho');
+    conferir(await pg.$eval('.tab-rola', e => e.scrollWidth <= e.clientWidth || e.tabIndex === 0), 'tabela que rola recebe foco pelo teclado');
+    const curta = await pg.evaluate(() => aulasTrilha('cam-ti').find(a => !a.modulos).id);
+    await ir(pg, 'aula-' + curta);
+    await pg.focus('[data-a="nivel"][data-v="simples"]'); await pg.keyboard.press('Shift+Tab'); await pg.keyboard.press('Tab');
+    const ni = await pg.$eval('[data-a="nivel"][data-v="simples"]', e => { const s = getComputedStyle(e); return [s.outlineStyle, s.outlineOffset]; });
+    conferir(ni[0] === 'solid' && ni[1] === '-3px', 'o contorno dos níveis fica para dentro, sem ser cortado');
+    await ir(pg, 'simulado-ativo');
+    const alt = await pg.$eval('.grade-c button', e => e.getBoundingClientRect().height);
+    conferir(alt >= 24, `botões da grade do simulado têm 24 px ou mais (${alt})`);
+    await pg.context().close();
+    // Todo elemento alcançável pelo Tab mostra contorno de foco, em todas as telas.
+    const pc = await abrir({}, true); let sem = [], total = 0;
+    for (const rota of ['inicio', 'aulas', 'aula-' + curta, 'aula-' + Object.keys(r.modOk)[0], 'questoes', 'simulados', 'simulado-ativo', 'simulado-' + r.sims[0].t, 'discursivas', 'disc-' + Object.keys(r.disc)[0], 'desempenho', 'fontes']) {
+      await ir(pc, rota);
+      const n = await pc.$$eval('a[href],button:not([disabled]),input,select,textarea,summary,[tabindex="0"]', e => e.filter(x => x.getClientRects().length).length);
+      await pc.focus('#main');
+      await pc.evaluate(() => scrollTo(0, 0));
+      for (let i = 0; i < Math.min(n, 60); i++) {
+        await pc.keyboard.press('Tab');
+        const f = await pc.evaluate(() => { const a = document.activeElement; if (a === document.body) return null; const alvo = a.matches('.sr') ? a.closest('label') : a, s = getComputedStyle(alvo); return { ok: s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) >= 2, nome: a.tagName + '.' + a.className }; });
+        if (!f) break; total++; if (!f.ok) sem.push(rota + ': ' + f.nome);
+      }
+    }
+    conferir(sem.length === 0, `todos os ${total} focos percorridos têm contorno visível ` + [...new Set(sem)].slice(0, 5).join(' ; '));
+    await pc.context().close();
+  }
+
   // FIM
   conferir(erros.length === 0, 'nenhum erro no console: ' + (erros.join(' | ') || 'zero'));
   await nav.close(); srv.fechar();
