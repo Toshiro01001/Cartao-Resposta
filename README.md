@@ -2,7 +2,7 @@
 
 Plataforma de estudos para concursos públicos, com aulas em quatro níveis de ensino, banco de questões comentadas, simulados pontuados pelas regras dos editais e treino de discursiva.
 
-O sistema inteiro cabe em um único arquivo, `index.html`. Não precisa de servidor, instalação nem login, e funciona no computador e no celular.
+O sistema inteiro cabe em um único arquivo, `index.html`. Não precisa de servidor, instalação nem login, e funciona no computador e no celular. Depois da primeira visita, abre também sem internet.
 
 ## Concursos atendidos
 
@@ -82,7 +82,7 @@ O progresso fica no `localStorage` do navegador, separado por perfil. Não há c
 
 ## Publicação no GitHub Pages
 
-1. Crie um repositório e envie `index.html` e `README.md` para a raiz.
+1. Crie um repositório e envie `index.html`, `sw.js`, `compartilhar.png` e `README.md` para a raiz.
 2. Abra **Settings > Pages**.
 3. Em **Build and deployment**, escolha **Deploy from a branch**, a branch `main` e a pasta `/ (root)`.
 4. Salve e aguarde o link aparecer na mesma página.
@@ -93,7 +93,9 @@ Para atualizar, substitua o `index.html`. O progresso salvo no navegador continu
 
 - HTML, CSS e JavaScript puros, sem framework e sem etapa de build no repositório.
 - Todo o conteúdo fica embutido no `index.html`, com cerca de 2 MB.
-- As fontes vêm do Google Fonts, com fontes do sistema como alternativa.
+- As fontes vêm do Google Fonts sem bloquear a abertura, com fontes do sistema como alternativa.
+- `sw.js` guarda uma cópia do site para uso sem internet. Com internet, a página sempre vem da rede, então uma versão nova aparece na primeira visita.
+- `tests/` traz os testes automatizados, feitos com Playwright e fora do que o site carrega.
 - Tema claro e escuro, layout adaptado ao celular e navegação por âncoras na URL.
 
 ## Limites do conteúdo
@@ -107,6 +109,42 @@ Para atualizar, substitua o `index.html`. O progresso salvo no navegador continu
 
 Este é um projeto pessoal de estudo, sem vínculo com as bancas, os órgãos ou os cursos preparatórios mencionados.
 
----
+## Para quem avalia contratar
+
+O Cartão-Resposta é um sistema em uso de verdade: duas pessoas estudam nele para provas marcadas, com o progresso guardado nos próprios aparelhos. Ele é uma amostra de como eu construo e mantenho software sem interromper quem depende dele.
+
+### O que o sistema demonstra
+
+- **Regra de negócio real:** cada simulado segue a pontuação do seu edital, com pesos, desconto por erro e mínimos por área, em cinco trilhas de concurso.
+- **Conteúdo grande sem servidor:** 127 aulas, 918 questões e 14 discursivas, com busca, filtros e revisão espaçada, tudo rodando no navegador.
+- **Dados que sobrevivem a atualizações:** um teste de regressão compara, byte a byte, o progresso gerado pela versão de referência e pela versão atual.
+- **Acessibilidade tratada como requisito:** uso pelo teclado, foco que não se perde ao redesenhar a tela, estados anunciados ao leitor de tela e auditoria com axe-core.
+- **Celular de verdade:** o percurso automatizado roda em 1366 x 800, no tamanho do iPhone 13 e em 320 px, sem rolagem lateral, conferindo todas as aulas e questões na tela menor.
+- **Uso sem internet sem prender versões antigas:** o service worker usa a rede primeiro e só recorre à cópia guardada quando ela falha.
+
+### Como funciona
+
+1. `index.html` traz a interface e o banco de conteúdo embutido. Uma única função desenha a tela conforme a âncora da URL, como `#questoes` ou `#simulado-ativo`.
+2. O progresso de cada perfil é um objeto JSON salvo no `localStorage`. O código de progresso é esse mesmo JSON, o que permite levá-lo a outro aparelho, onde as respostas mais recentes prevalecem.
+3. A nota do simulado é calculada no próprio navegador, com as regras de cada edital.
+4. `sw.js` entrega a página pela rede e guarda uma cópia, usada quando não há conexão.
+
+### Tecnologias
+
+- HTML, CSS e JavaScript puros, sem framework, sem dependências e sem etapa de build.
+- `localStorage`, Cache Storage e Service Worker, além de ARIA para leitores de tela.
+- GitHub Pages para a publicação.
+- Playwright e Chromium nos testes, com axe-core na auditoria de acessibilidade. Nada disso é carregado pelo site.
+
+### Rodar os testes
+
+Com Node.js e Playwright instalados, na raiz do repositório:
+
+```
+node tests/regressao.js
+node tests/percurso.js --completo
+node tests/correcoes.js
+node tests/offline.js
+```
 
 Desenvolvido por Rodrigo Terroso Junior. O Claude, da Anthropic, foi usado como ferramenta durante o desenvolvimento.
