@@ -970,6 +970,8 @@ document.addEventListener('input',e=>{
 window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0);focoPrincipal()});
 try{const tm=localStorage.getItem(CHAVE+'.tema');if(tm)document.documentElement.setAttribute('data-theme',tm)}catch(e){}
 render();
+/* Sem internet: o service worker usa a rede primeiro e só recorre à cópia guardada quando ela falha. */
+try{if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).catch(()=>{})})}catch(e){}
 </script>
 </body>
 </html>

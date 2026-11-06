@@ -7,10 +7,13 @@ const CHAVE = 'cartao-resposta.v1';
 const INICIO = Date.parse('2026-11-20T12:00:00-04:00');
 
 // Servidor local parecido com o GitHub Pages: gzip e cache de 10 minutos.
-function servir(raiz = RAIZ, trocar = {}) {
+function servir(raiz = RAIZ, trocar = {}, prefixo = '') {
   const tipos = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.png': 'image/png', '.json': 'application/json' };
   const srv = http.createServer((req, res) => {
     let p = decodeURIComponent(req.url.split('?')[0]);
+    if (prefixo && !p.startsWith(prefixo + '/')) { res.writeHead(404); return res.end('nao encontrado'); }
+    if (trocar.__status) { res.writeHead(trocar.__status); return res.end('erro'); }
+    p = p.slice(prefixo.length);
     if (p.endsWith('/')) p += 'index.html';
     const arq = path.join(raiz, p);
     if (!arq.startsWith(raiz) || !fs.existsSync(arq) || fs.statSync(arq).isDirectory()) { res.writeHead(404); return res.end('nao encontrado'); }
@@ -19,7 +22,7 @@ function servir(raiz = RAIZ, trocar = {}) {
     if (/html|javascript/.test(h['Content-Type'])) { corpo = zlib.gzipSync(corpo); h['Content-Encoding'] = 'gzip'; }
     res.writeHead(200, h); res.end(corpo);
   });
-  return new Promise(ok => srv.listen(0, '127.0.0.1', () => ok({ base: `http://localhost:${srv.address().port}`, fechar: () => srv.close() })));
+  return new Promise(ok => srv.listen(0, '127.0.0.1', () => ok({ base: `http://localhost:${srv.address().port}${prefixo}`, raiz: `http://localhost:${srv.address().port}`, fechar: () => srv.close() })));
 }
 
 // O ambiente de teste não acessa o Google Fonts: responde vazio para testar só o site.
