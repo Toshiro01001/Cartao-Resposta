@@ -31,7 +31,7 @@ async function bloquearFontes(alvo) {
 }
 
 const contexto = async (nav, op = {}) => {
-  const c = await nav.newContext({ viewport: { width: 1366, height: 800 }, locale: 'pt-BR', timezoneId: 'America/Cuiaba', serviceWorkers: 'block', ...op });
+  const c = await nav.newContext({ viewport: { width: 1366, height: 800 }, locale: 'pt-BR', timezoneId: 'America/Cuiaba', serviceWorkers: process.env.COM_SW ? 'allow' : 'block', ...op });
   await bloquearFontes(c);
   return c;
 };

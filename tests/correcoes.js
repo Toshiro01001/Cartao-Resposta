@@ -209,6 +209,18 @@ const conferir = (c, m) => { c ? oks++ : falhas.push(m); console.log((c ? 'ok   
     await pg.context().close();
   }
 
+  // Metadados de compartilhamento.
+  {
+    const pg = await abrir();
+    const meta = n => pg.getAttribute(`meta[property="${n}"]`, 'content');
+    conferir((await meta('og:title')).includes('Cartão-Resposta') && !!(await meta('og:description')), 'título e descrição de compartilhamento presentes');
+    const img = path.basename(new URL(await meta('og:image')).pathname), arq = path.join(__dirname, '..', img);
+    conferir(fs.existsSync(arq), 'a imagem de compartilhamento existe na raiz');
+    const b = fs.readFileSync(arq);
+    conferir(b.readUInt32BE(16) === 1200 && b.readUInt32BE(20) === 630, 'a imagem tem 1200 x 630');
+    await pg.context().close();
+  }
+
   // FIM
   conferir(erros.length === 0, 'nenhum erro no console: ' + (erros.join(' | ') || 'zero'));
   await nav.close(); srv.fechar();
