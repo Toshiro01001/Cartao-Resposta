@@ -417,9 +417,18 @@ const sessao={};            // respostas marcadas e alternativas riscadas, antes
 let toastT;
 function toast(m){let e=$('.toast');if(e)e.remove();e=document.createElement('div');e.className='toast';e.setAttribute('role','status');e.textContent=m;document.body.append(e);clearTimeout(toastT);toastT=setTimeout(()=>e.remove(),2600)}
 function perguntar(tit,txt,sim,acao){
-  const f=document.createElement('div');f.className='modal-fundo';
-  f.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${esc(tit)}"><h2>${esc(tit)}</h2><p>${esc(txt)}</p><div class="fila" style="justify-content:flex-end"><button class="bt cinza" id="m-nao">Voltar</button><button class="bt" id="m-sim">${esc(sim)}</button></div></div>`;
-  document.body.append(f);$('#m-nao',f).onclick=()=>f.remove();$('#m-sim',f).onclick=()=>{f.remove();acao()};$('#m-sim',f).focus();
+  const ant=document.activeElement,f=document.createElement('div');f.className='modal-fundo';
+  f.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${esc(tit)}" aria-describedby="m-txt"><h2>${esc(tit)}</h2><p id="m-txt">${esc(txt)}</p><div class="fila" style="justify-content:flex-end"><button class="bt cinza" id="m-nao">Voltar</button><button class="bt" id="m-sim">${esc(sim)}</button></div></div>`;
+  document.body.append(f);
+  const nao=$('#m-nao',f),si=$('#m-sim',f);
+  const fecha=()=>{document.removeEventListener('keydown',tecla,true);f.remove()};
+  const volta=()=>{if(ant&&ant.isConnected&&ant!==document.body)focar(ant);else focoPrincipal()};
+  const tecla=e=>{
+    if(e.key==='Escape'){e.preventDefault();fecha();volta()}
+    else if(e.key==='Tab'){e.preventDefault();(document.activeElement===si?nao:si).focus()} // o foco fica preso na janela, entre os dois botões
+  };
+  document.addEventListener('keydown',tecla,true);
+  nao.onclick=()=>{fecha();volta()};si.onclick=()=>{fecha();acao();volta()};si.focus();
 }
 
 /* ---------- moldura ---------- */

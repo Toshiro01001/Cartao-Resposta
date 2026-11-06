@@ -104,6 +104,23 @@ const conferir = (c, m) => { c ? oks++ : falhas.push(m); console.log((c ? 'ok   
     await cel.context().close();
   }
 
+  // Janela de confirmação.
+  {
+    const pg = await abrir();
+    await ir(pg, 'simulados'); await pg.click('[data-a="sim-novo"][data-v="rapido"]'); await pg.waitForSelector('#relogio');
+    await pg.focus('[data-a="sim-fim"]'); await pg.keyboard.press('Enter');
+    conferir(await focoEm(pg, '#m-sim'), 'a janela abre com foco no botão principal');
+    await pg.keyboard.press('Tab'); conferir(await focoEm(pg, '#m-nao'), 'Tab vai para o outro botão da janela');
+    await pg.keyboard.press('Tab'); conferir(await focoEm(pg, '#m-sim'), 'Tab não sai da janela');
+    await pg.keyboard.press('Escape');
+    conferir(!(await pg.$('.modal')) && await focoEm(pg, '[data-a="sim-fim"]'), 'Esc fecha a janela e devolve o foco a quem abriu');
+    conferir(!!(await pg.evaluate(() => P().sim)), 'Esc não entrega a prova');
+    await pg.keyboard.press('Enter'); await pg.keyboard.press('Enter');
+    await pg.waitForSelector('.placar');
+    conferir(await focoEm(pg, '#main'), 'entregar leva o foco ao resultado');
+    await pg.context().close();
+  }
+
   // FIM
   conferir(erros.length === 0, 'nenhum erro no console: ' + (erros.join(' | ') || 'zero'));
   await nav.close(); srv.fechar();
