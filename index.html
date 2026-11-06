@@ -187,6 +187,7 @@ code{font-family:var(--f-mono);font-size:.88em;background:var(--linha2);padding:
 .q{background:var(--folha);border:1px solid var(--linha);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:11px;min-width:0}
 .q-topo{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
 .q-topo .icone{margin-left:auto}
+label.bt:focus-within{outline:3px solid var(--caneta);outline-offset:2px}
 .pular{position:absolute;left:8px;top:-80px;z-index:40;padding:8px 14px;border-radius:7px;background:var(--caneta);color:var(--sobre-caneta);font-weight:700}
 .pular:focus{top:8px}
 [tabindex="-1"]:focus-visible{outline:none}
@@ -807,7 +808,7 @@ function vDesempenho(){
   <section class="folha pilha"><h2>Vocês dois</h2><div class="tab-rola"><table class="tab"><thead><tr><th>Perfil</th><th>Respondidas</th><th>Acerto</th><th>Aulas</th><th>Simulados</th></tr></thead><tbody>${comp}</tbody></table></div><p class="peq mudo">Cada aparelho guarda só o que foi feito nele. Para somar o progresso de dois aparelhos, copie o código em um e cole no outro.</p></section>
   <section class="folha pilha"><h2>Guardar ou levar o progresso</h2>
     <p class="peq mudo">O progresso fica neste navegador. Limpar os dados do navegador apaga tudo, então guarde uma cópia de vez em quando.</p>
-    <div class="fila"><button class="bt sec" data-a="exp-copia">Copiar código de progresso</button><button class="bt cinza" data-a="exp-arq">Baixar arquivo</button><label class="bt cinza" style="cursor:pointer">Abrir arquivo<input type="file" id="imp-arq" accept=".json,application/json" hidden></label></div>
+    <div class="fila"><button class="bt sec" data-a="exp-copia">Copiar código de progresso</button><button class="bt cinza" data-a="exp-arq">Baixar arquivo</button><label class="bt cinza" style="cursor:pointer">Abrir arquivo<input type="file" id="imp-arq" class="sr" accept=".json,application/json"></label></div>
     <label class="campo" for="imp-tx">Colar código de outro aparelho</label><textarea class="cx" id="imp-tx" placeholder="Cole aqui o código copiado"></textarea>
     <div class="fila"><button class="bt cinza" data-a="imp-cola">Juntar este progresso</button><button class="bt cinza" data-a="zerar" style="color:var(--errado)">Apagar o progresso de ${esc(p.nome)}</button></div></section></div>`;
 }

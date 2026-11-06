@@ -121,6 +121,21 @@ const conferir = (c, m) => { c ? oks++ : falhas.push(m); console.log((c ? 'ok   
     await pg.context().close();
   }
 
+  // Abrir arquivo de progresso pelo teclado.
+  {
+    const pg = await abrir();
+    await ir(pg, 'desempenho');
+    await pg.focus('[data-a="exp-arq"]'); await pg.keyboard.press('Tab');
+    conferir(await focoEm(pg, '#imp-arq'), 'Tab alcança o botão Abrir arquivo');
+    const contorno = await pg.$eval('label.bt', e => getComputedStyle(e).outlineStyle);
+    conferir(contorno === 'solid', 'Abrir arquivo mostra contorno de foco');
+    const arq = path.join(os.tmpdir(), `progresso-teste-${process.pid}.json`); fs.writeFileSync(arq, ref);
+    await pg.setInputFiles('#imp-arq', arq); await pg.waitForSelector('.toast');
+    conferir(JSON.stringify(JSON.parse((await lerProgresso(pg)).v1).perfis.rodrigo.resp) === JSON.stringify(JSON.parse(ref).perfis.rodrigo.resp), 'abrir arquivo junta o progresso');
+    fs.unlinkSync(arq);
+    await pg.context().close();
+  }
+
   // FIM
   conferir(erros.length === 0, 'nenhum erro no console: ' + (erros.join(' | ') || 'zero'));
   await nav.close(); srv.fechar();
