@@ -822,6 +822,8 @@ function juntar(j){
     const a=S.perfis[k]||(S.perfis[k]=perfilNovo(o.nome||k,o.trilhas||['cam-al']));
         Object.entries(o.resp||{}).forEach(([q,r])=>{if(!a.resp[q]||r.t>a.resp[q].t)a.resp[q]=r});
     Object.assign(a.fav,o.fav||{});Object.assign(a.vistas,o.vistas||{});Object.assign(a.marcas,o.marcas||{});
+    Object.entries(o.modOk||{}).forEach(([au,m])=>{a.modOk=a.modOk||{};a.modOk[au]=Object.assign(a.modOk[au]||{},m)});
+    Object.entries(o.modI||{}).forEach(([au,i])=>{a.modI=a.modI||{};if(a.modI[au]===undefined)a.modI[au]=i});
     Object.entries(o.rev||{}).forEach(([q,r])=>{if(!a.rev[q])a.rev[q]=r});
     Object.entries(o.disc||{}).forEach(([q,r])=>{if(!a.disc[q])a.disc[q]=r});
     Object.entries(o.dia||{}).forEach(([d,r])=>{const x=a.dia[d];if(!x||r.r>x.r)a.dia[d]=r});

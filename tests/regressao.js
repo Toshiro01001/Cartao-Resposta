@@ -60,7 +60,7 @@ const conferir = (cond, msg) => { (cond ? ok : falhas).push(msg); console.log((c
   await pg2.click('[data-a="imp-cola"]');
   await pg2.waitForSelector('.toast');
   const dep = JSON.parse((await lerProgresso(pg2)).v1);
-  for (const k of Object.keys(S.perfis)) for (const c of ['resp', 'fav', 'vistas', 'marcas', 'rev', 'disc', 'dia', 'sims'])
+  for (const k of Object.keys(S.perfis)) for (const c of ['resp', 'fav', 'vistas', 'marcas', 'rev', 'disc', 'dia', 'sims', 'modOk', 'modI'])
     conferir(JSON.stringify(dep.perfis[k][c]) === JSON.stringify(S.perfis[k][c]), `juntar código antigo preserva ${k}.${c}`);
 
   // 5. Quem já tem progresso salvo pela versão antiga abre a versão atual.
