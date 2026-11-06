@@ -195,6 +195,20 @@ const conferir = (c, m) => { c ? oks++ : falhas.push(m); console.log((c ? 'ok   
     await pg.context().close();
   }
 
+  // Falha ao salvar não pode passar em silêncio, e os avisos chegam ao leitor de tela.
+  {
+    const pg = await abrir();
+    await ir(pg, 'desempenho'); await pg.click('[data-a="exp-arq"]');
+    await pg.waitForFunction(() => document.getElementById('anuncio').textContent.includes('Arquivo baixado'));
+    conferir(true, 'aviso rápido chega à região anunciada ao leitor de tela');
+    await pg.evaluate(() => { Storage.prototype.setItem = () => { throw new DOMException('cheio', 'QuotaExceededError'); }; });
+    await ir(pg, 'questoes');
+    const q = await pg.$eval('article.q', e => e.id.slice(2));
+    await pg.click(`[data-a="fav"][data-v="${q}"]`);
+    conferir((await pg.textContent('.toast')).includes('Não consegui salvar'), 'falha ao salvar mostra um aviso');
+    await pg.context().close();
+  }
+
   // FIM
   conferir(erros.length === 0, 'nenhum erro no console: ' + (erros.join(' | ') || 'zero'));
   await nav.close(); srv.fechar();
