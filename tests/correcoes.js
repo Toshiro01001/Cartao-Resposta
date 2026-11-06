@@ -62,6 +62,48 @@ const conferir = (c, m) => { c ? oks++ : falhas.push(m); console.log((c ? 'ok   
     await pg.context().close();
   }
 
+  // Foco do teclado.
+  {
+    const pg = await abrir();
+    await pg.keyboard.press('Tab');
+    conferir(await focoEm(pg, '.pular'), 'primeiro Tab chega ao link de pular');
+    const top = await pg.$eval('.pular', e => e.getBoundingClientRect().top);
+    conferir(top >= 0, 'o link de pular fica visível ao receber foco');
+    await pg.keyboard.press('Enter');
+    conferir(await focoEm(pg, '#main'), 'pular leva o foco ao conteúdo');
+    await ir(pg, 'aulas');
+    conferir(await focoEm(pg, '#main'), 'trocar de página leva o foco ao conteúdo');
+    await ir(pg, 'questoes');
+    const q = await pg.$eval('article.q', e => e.id.slice(2)), alt = `[data-a="marcar"][data-q="${q}"][data-v="0"]`;
+    await pg.focus(alt); await pg.keyboard.press('Enter');
+    conferir(await focoEm(pg, alt) && await pg.getAttribute(alt, 'aria-pressed') === 'true', 'marcar com Enter mantém o foco na alternativa');
+    await pg.focus(`[data-a="fav"][data-v="${q}"]`); await pg.keyboard.press('Enter');
+    conferir(await focoEm(pg, `[data-a="fav"][data-v="${q}"]`), 'favoritar mantém o foco');
+    await pg.focus(`[data-a="responder"][data-v="${q}"]`); await pg.keyboard.press('Enter');
+    conferir(await focoEm(pg, `#q-${q} .veredito`), 'responder leva o foco ao veredito');
+    await pg.focus('#f-st'); await pg.selectOption('#f-st', 'nao');
+    conferir(await focoEm(pg, '#f-st'), 'filtro usado pelo teclado mantém o foco');
+    const curta = await pg.evaluate(() => aulasTrilha('cam-ti').find(a => !a.modulos).id);
+    await ir(pg, 'aula-' + curta);
+    const nv = '[data-a="nivel"][data-v="simples"]';
+    await pg.focus(nv); await pg.keyboard.press('Enter');
+    conferir(await focoEm(pg, nv), 'trocar o nível mantém o foco');
+    await ir(pg, 'simulados'); await pg.click('[data-a="sim-novo"][data-v="rapido"]'); await pg.waitForSelector('#relogio');
+    await pg.focus('[data-a="sim-marca"][data-v="1"]'); await pg.keyboard.press('Enter');
+    conferir(await focoEm(pg, '[data-a="sim-marca"][data-v="1"]'), 'marcar no simulado mantém o foco');
+    await pg.focus('.bt[data-a="sim-ir"]:last-child'); await pg.keyboard.press('Enter');
+    conferir(await focoEm(pg, '.sim-layout .q'), 'Próxima leva o foco à questão nova');
+    await pg.focus('.grade-c [data-v="3"]'); await pg.keyboard.press('Enter');
+    conferir(await focoEm(pg, '.grade-c [data-v="3"]'), 'a grade do simulado mantém o foco');
+    await pg.context().close();
+    // Toque no celular: um campo nunca recebe foco sozinho depois de redesenhar.
+    const cel = await abrir({ viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true });
+    await ir(cel, 'questoes');
+    await cel.tap('#f-st'); await cel.selectOption('#f-st', 'nao');
+    conferir(!(await focoEm(cel, 'select,input,textarea')), 'no toque, redesenhar não devolve o foco a campos');
+    await cel.context().close();
+  }
+
   // FIM
   conferir(erros.length === 0, 'nenhum erro no console: ' + (erros.join(' | ') || 'zero'));
   await nav.close(); srv.fechar();

@@ -187,6 +187,9 @@ code{font-family:var(--f-mono);font-size:.88em;background:var(--linha2);padding:
 .q{background:var(--folha);border:1px solid var(--linha);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:11px;min-width:0}
 .q-topo{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
 .q-topo .icone{margin-left:auto}
+.pular{position:absolute;left:8px;top:-80px;z-index:40;padding:8px 14px;border-radius:7px;background:var(--caneta);color:var(--sobre-caneta);font-weight:700}
+.pular:focus{top:8px}
+[tabindex="-1"]:focus-visible{outline:none}
 .sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 .q-topo .chip{white-space:normal;overflow-wrap:anywhere;max-width:100%}
 .enun{white-space:pre-wrap;overflow-wrap:anywhere}
@@ -426,8 +429,8 @@ function moldura(rota){
   const baixo=[['inicio','Início'],['aulas','Aulas'],['questoes','Questões'],['simulados','Simulados']].map(([r,n])=>`<a href="#${r}" ${ativo(rota,r)?'aria-current="page"':''}>${svg(r)}${n}</a>`).join('')+`<a href="#mais" ${['mais','discursivas','desempenho','fontes'].some(r=>ativo(rota,r))?'aria-current="page"':''}>${svg('mais')}Mais</a>`;
   const perfis=Object.entries(S.perfis).map(([k,v])=>`<button data-a="perfil" data-v="${k}" aria-pressed="${k===S.atual}">${esc(v.nome)}</button>`).join('');
   const sel=p.trilhas.length>1?`<select class="sel" id="trilha-sel" aria-label="Concurso">${p.trilhas.map(t=>`<option value="${t}" ${t===p.trilha?'selected':''}>${esc(TRILHAS[t].curto)}</option>`).join('')}</select>`:`<span class="peq mudo">${esc(T().curto)}</span>`;
-  return `<div class="app"><aside class="lado"><a href="#inicio" class="marca-site" style="text-decoration:none;color:inherit"><i></i>Cartão-Resposta</a><nav class="nav" aria-label="Principal">${nav}</nav><div class="lado-pe"><button class="bt cinza mini" data-a="tema">${svg('lua').replace('<svg','<svg style="width:15px;height:15px"')}Trocar tema</button></div></aside>
-  <div style="min-width:0"><header class="topo"><a href="#inicio" class="marca-site" style="text-decoration:none;color:inherit" aria-label="Cartão-Resposta: ir para o início"><i></i></a><div class="perfis" role="group" aria-label="Quem está estudando">${perfis}</div>${sel}</header><main class="conteudo" id="main"></main></div>
+  return `<button class="pular" data-a="pular">Pular para o conteúdo</button><div class="app"><aside class="lado"><a href="#inicio" class="marca-site" style="text-decoration:none;color:inherit"><i></i>Cartão-Resposta</a><nav class="nav" aria-label="Principal">${nav}</nav><div class="lado-pe"><button class="bt cinza mini" data-a="tema">${svg('lua').replace('<svg','<svg style="width:15px;height:15px"')}Trocar tema</button></div></aside>
+  <div style="min-width:0"><header class="topo"><a href="#inicio" class="marca-site" style="text-decoration:none;color:inherit" aria-label="Cartão-Resposta: ir para o início"><i></i></a><div class="perfis" role="group" aria-label="Quem está estudando">${perfis}</div>${sel}</header><main class="conteudo" id="main" tabindex="-1"></main></div>
   <nav class="baixo" aria-label="Principal">${baixo}</nav></div>`;
 }
 function ativo(rota,r){return rota===r||(r==='aulas'&&rota.startsWith('aula-'))||(r==='simulados'&&rota.startsWith('simulado'))||(r==='discursivas'&&rota.startsWith('disc-'))}
@@ -586,7 +589,7 @@ function cardQ(q,modo){
     const op=[[true,'C','Certo'],[false,'E','Errado']];
     corpo=`<div class="ce">${op.map(([v,l,n])=>{let c='';if(r.m===v)c='marcada';if(reso){if(v===q.ans)c='ok';else if(r.m===v)c='no'}return `<button class="${c}" data-a="marcar" data-q="${q.id}" data-v="${v}" aria-pressed="${r.m===v}" ${reso?'disabled':''}><span class="bol" ${r.m===v&&!reso?'style="background:var(--caneta);border-color:var(--caneta);color:var(--sobre-caneta)"':''}>${l}</span>${n}${reso&&r.m===v?'<span class="sr"> (sua resposta)</span>':''}${reso&&v===q.ans?'<span class="sr"> (gabarito)</span>':''}</button>`}).join('')}</div>`;
   }
-  const rodape=reso?`<div class="com"><span class="veredito ${r.m===q.ans?'ok':'no'}">${r.m===q.ans?'Você acertou.':`Você errou. Gabarito: ${q.tipo==='mc'?'ABCDE'[q.ans]:(q.ans?'Certo':'Errado')}.`}</span><div>${txt(q.com)}</div><div class="peq mudo">Fonte: ${txt(q.ref)}</div>${AULA[q.aula]?`<a class="peq" href="#aula-${q.aula}">Estudar esta aula: ${esc(AULA[q.aula].titulo)}</a>`:''}</div>`:`<div><button class="bt" data-a="responder" data-v="${q.id}" ${r.m===undefined?'disabled':''}>Responder</button></div>`;
+  const rodape=reso?`<div class="com"><span class="veredito ${r.m===q.ans?'ok':'no'}" tabindex="-1">${r.m===q.ans?'Você acertou.':`Você errou. Gabarito: ${q.tipo==='mc'?'ABCDE'[q.ans]:(q.ans?'Certo':'Errado')}.`}</span><div>${txt(q.com)}</div><div class="peq mudo">Fonte: ${txt(q.ref)}</div>${AULA[q.aula]?`<a class="peq" href="#aula-${q.aula}">Estudar esta aula: ${esc(AULA[q.aula].titulo)}</a>`:''}</div>`:`<div><button class="bt" data-a="responder" data-v="${q.id}" ${r.m===undefined?'disabled':''}>Responder</button></div>`;
   return `<article class="q" id="q-${q.id}">${topo}<div class="enun">${esc(q.enun)}</div>${corpo}${rodape}</article>`;
 }
 function filtrar(){
@@ -715,7 +718,7 @@ function vSimAtivo(){
   const grade=s.qs.map((id,k)=>{const qq=QUEST[id],v=s.r[id];const tem=v!==undefined&&v!==null;const lt=!tem?'':qq.tipo==='mc'?'ABCDE'[v]:(v?'C':'E');return `<button class="${tem?'res':''} ${k===i?'atual':''}" data-a="sim-ir" data-v="${k}" ${k===i?'aria-current="true"':''} aria-label="Questão ${k+1}${tem?', marcada '+lt:', em branco'}"><i>${lt}</i>${k+1}</button>`}).join('');
   const feitas=s.qs.filter(id=>s.r[id]!==undefined&&s.r[id]!==null).length;
   return `<div class="pilha" style="gap:14px"><div class="fila entre"><h1 style="font-size:1.7rem">${esc(s.nome)}</h1><button class="bt cinza mini" data-a="sim-pausa">${s.pausa!==undefined&&s.pausa!==null?'Retomar relógio':'Pausar relógio'}</button></div>
-  <div class="sim-layout"><div class="pilha"><div class="q"><div class="q-topo"><span class="chip num">Questão ${i+1} de ${s.qs.length}</span><span class="chip">${esc(DISC[q.disc].nome)}</span><span class="chip num">${n2(ptsQ(q,s.trilha))} ${ptsQ(q,s.trilha)===1?'ponto':'pontos'}</span></div><div class="enun">${esc(q.enun)}</div>${opc}${m!==undefined&&m!==null?`<div><button class="bt cinza mini" data-a="sim-limpa">Deixar em branco</button></div>`:''}</div>
+  <div class="sim-layout"><div class="pilha"><div class="q" tabindex="-1"><div class="q-topo"><span class="chip num">Questão ${i+1} de ${s.qs.length}</span><span class="chip">${esc(DISC[q.disc].nome)}</span><span class="chip num">${n2(ptsQ(q,s.trilha))} ${ptsQ(q,s.trilha)===1?'ponto':'pontos'}</span></div><div class="enun">${esc(q.enun)}</div>${opc}${m!==undefined&&m!==null?`<div><button class="bt cinza mini" data-a="sim-limpa">Deixar em branco</button></div>`:''}</div>
   <div class="fila entre"><button class="bt cinza" data-a="sim-ir" data-v="${i-1}" ${i<1?'disabled':''}>Anterior</button><button class="bt" data-a="sim-ir" data-v="${i+1}" ${i>=s.qs.length-1?'disabled':''}>Próxima</button></div></div>
   <aside class="folha sim-painel pilha"><div class="relogio" id="relogio" role="timer" aria-label="Tempo restante">0:00:00</div><p class="peq mudo num">${feitas} de ${s.qs.length} marcadas</p><div class="grade-c">${grade}</div><button class="bt" data-a="sim-fim">Entregar prova</button></aside></div></div>`;
 }
@@ -842,7 +845,22 @@ function vFontes(){
 function vMais(){return `<div class="pilha-g"><h1>Mais</h1><div class="pilha">${[['discursivas','Discursivas','Escreva, confira o espelho e dê sua nota.'],['desempenho','Desempenho','Pontos fortes, fracos e cópia do progresso.'],['fontes','Editais e provas','Editais, provas reais e o que mais caiu.']].map(([r,n,d])=>`<a class="folha" href="#${r}" style="text-decoration:none;color:inherit"><strong>${n}</strong><br><span class="peq mudo">${d}</span></a>`).join('')}<button class="bt cinza" data-a="tema">Trocar tema</button></div></div>`}
 
 /* ---------- roteamento ---------- */
+/* Redesenhar a tela destrói o elemento em foco. Estas funções devolvem o foco a quem usa teclado ou leitor de tela. */
+let teclado=false;
+document.addEventListener('keydown',()=>{teclado=true},true);
+document.addEventListener('pointerdown',()=>{teclado=false},true);
+function seletorFoco(){
+  const a=document.activeElement,r=document.getElementById('raiz');
+  if(!a||!r||!r.contains(a))return null;
+  const d=a.dataset||{};
+  if(d.a){let s=(d.a==='sim-ir'&&a.classList.contains('bt')?'.bt':'')+`[data-a="${d.a}"]`;if(d.q!==undefined)s+=`[data-q="${d.q}"]`;if(d.v!==undefined)s+=`[data-v="${d.v}"]`;return s}
+  return teclado&&a.id&&a.id!=='main'?'#'+a.id:null; // campos só pelo teclado: no celular, focar abriria teclado ou seletor
+}
+const focar=e=>{if(e)e.focus({preventScroll:true})};
+const focoPrincipal=()=>focar($('#main'));
+function devolveFoco(sel){if(!sel)return;const e=$(sel);if(e&&!e.disabled)focar(e);else focoPrincipal()}
 function render(){
+  const foco=seletorFoco();
   const rota=(location.hash||'#inicio').slice(1)||'inicio';
   document.getElementById('raiz').innerHTML=moldura(rota);
   const m=$('#main');let h;
@@ -864,8 +882,9 @@ function render(){
   if(rota.startsWith('disc-'))notaDisc(rota.slice(5));
   document.title='Cartão-Resposta';
   const tp=$('.topo');if(tp)document.documentElement.style.setProperty('--topo-h',tp.offsetHeight+'px');
+  devolveFoco(foco);
 }
-function reQ(id){const el=document.getElementById('q-'+id);if(el){el.outerHTML=cardQ(QUEST[id])}}
+function reQ(id){const el=document.getElementById('q-'+id);if(el){const foco=seletorFoco();el.outerHTML=cardQ(QUEST[id]);if(foco){const n=$(foco);if(n&&!n.disabled)focar(n)}}}
 function mantemScroll(fn){const y=window.scrollY;fn();window.scrollTo(0,y)}
 
 /* ---------- eventos ---------- */
@@ -873,6 +892,7 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;
   const a=b.dataset.a,v=b.dataset.v,p=P();
   switch(a){
+    case 'pular':focoPrincipal();break;
     case 'perfil':S.atual=v;salvar();F={disc:'',aula:'',dif:'',st:'',busca:'',pag:0,seed:1};location.hash='inicio';render();window.scrollTo(0,0);break;
     case 'tema':{const r=document.documentElement,atual=r.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),n=atual==='dark'?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem(CHAVE+'.tema',n)}catch(x){}break}
     case 'nivel':p.nivel=v;salvar();mantemScroll(render);break;
@@ -884,7 +904,7 @@ document.addEventListener('click',e=>{
     case 'revisar':F={disc:'',aula:'',dif:'',st:'rev',busca:'',pag:0,seed:F.seed};location.hash='questoes';break;
     case 'marcar':{const q=QUEST[b.dataset.q];const val=q.tipo==='mc'?Number(v):v==='true';const s=sessao[q.id]=sessao[q.id]||{};if(s.feito)break;s.m=val;reQ(q.id);break}
     case 'riscar':{const id=b.dataset.q,n=Number(v),s=sessao[id]=sessao[id]||{};s.risc=s.risc||[];const k=s.risc.indexOf(n);if(k>=0)s.risc.splice(k,1);else{s.risc.push(n);if(s.m===n)delete s.m}reQ(id);break}
-    case 'responder':{const q=QUEST[v],s=sessao[v];if(!s||s.m===undefined)break;s.feito=true;registrar(q,s.m);reQ(v);break}
+    case 'responder':{const q=QUEST[v],s=sessao[v];if(!s||s.m===undefined)break;s.feito=true;registrar(q,s.m);reQ(v);focar($(`#q-${v} .veredito`));break}
     case 'fav':if(p.fav[v])delete p.fav[v];else p.fav[v]=true;salvar();reQ(v);break;
     case 'pag':F.pag=Number(v);render();window.scrollTo(0,0);break;
     case 'embaralhar':F.seed=Math.floor(Math.random()*233279)+1;F.pag=0;render();break;
@@ -897,7 +917,7 @@ document.addEventListener('click',e=>{
     case 'sim-marca':{const s=p.sim,q=QUEST[s.qs[s.i]];s.r[q.id]=q.tipo==='mc'?Number(v):v==='true';salvar();mantemScroll(render);break}
     case 'sim-limpa':{const s=p.sim;delete s.r[s.qs[s.i]];salvar();mantemScroll(render);break}
     case 'sim-risca':{const s=p.sim,id=s.qs[s.i],n=Number(v);s.risc[id]=s.risc[id]||[];const k=s.risc[id].indexOf(n);if(k>=0)s.risc[id].splice(k,1);else s.risc[id].push(n);salvar();mantemScroll(render);break}
-    case 'sim-ir':p.sim.i=Number(v);salvar();render();window.scrollTo(0,0);break;
+    case 'sim-ir':p.sim.i=Number(v);salvar();render();if(b.classList.contains('bt'))focar($('.sim-layout .q'));window.scrollTo(0,0);break;
     case 'sim-pausa':{const s=p.sim;if(s.pausa!==null&&s.pausa!==undefined){s.fim=Date.now()+s.pausa*1000;s.pausa=null}else s.pausa=(s.fim-Date.now())/1000;salvar();mantemScroll(render);break}
     case 'sim-fim':{const s=p.sim,br=s.qs.filter(i=>s.r[i]===undefined||s.r[i]===null).length;perguntar('Entregar a prova?',br?`Ainda há ${br} em branco. Depois de entregar, não dá para mudar.`:'Depois de entregar, não dá para mudar.','Entregar',entregar);break}
     case 'd-ver':{const g=p.disc[v]=p.disc[v]||{tx:'',ok:{}};const t=$('#redacao');if(t)g.tx=t.value;g.ver=!g.ver;salvar();mantemScroll(render);break}
@@ -926,7 +946,7 @@ document.addEventListener('input',e=>{
   if(t.id==='f-busca'){F.busca=t.value;F.pag=0;const pos=t.selectionStart;$('#main').innerHTML=vQuestoes();const n=$('#f-busca');n.focus();n.setSelectionRange(pos,pos)}
   if(t.id==='redacao'){const p=P(),id=t.dataset.d,g=p.disc[id]=p.disc[id]||{tx:'',ok:{}};g.tx=t.value;salvar();const d=DB.discursivas.find(x=>x.id===id),isSel=d.trilha!=='cgu-aud'&&d.trilha!=='pjc-inv',mn=isSel?d.linhas[0]:0;$('#cont-l').textContent=`Cerca de ${t.value?contaLinhas(t.value):0} linhas (estimadas em ${CAR_LINHA} caracteres por linha). Limite: ${mn?mn+' a ':'até '}${d.linhas[1]} linhas.`}
 });
-window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});
+window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0);focoPrincipal()});
 try{const tm=localStorage.getItem(CHAVE+'.tema');if(tm)document.documentElement.setAttribute('data-theme',tm)}catch(e){}
 render();
 </script>
