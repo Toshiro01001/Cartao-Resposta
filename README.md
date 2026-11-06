@@ -1,5 +1,7 @@
 # Cartão Resposta
 
+![Lista de questões do Cartão Resposta](docs/tela.webp)
+
 Plataforma de estudos para concursos públicos, com aulas em quatro níveis de ensino, banco de questões comentadas, simulados pontuados pelas regras dos editais e treino de discursiva.
 
 O sistema inteiro cabe em um único arquivo, `index.html`. Não precisa de servidor, instalação nem login, e funciona no computador e no celular. Depois da primeira visita, abre também sem internet.
@@ -147,4 +149,4 @@ node tests/correcoes.js
 node tests/offline.js
 ```
 
-Desenvolvido por Rodrigo Terroso Junior. O Claude, da Anthropic, foi usado como ferramenta durante o desenvolvimento.
+Desenvolvi este projeto e usei o Claude, da Anthropic, como ferramenta durante o desenvolvimento.
