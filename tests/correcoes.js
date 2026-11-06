@@ -1,0 +1,57 @@
+// Cada correção da auditoria tem aqui uma verificação, para não voltar a quebrar.
+//   node tests/correcoes.js
+const fs = require('fs'), path = require('path'), os = require('os');
+const { CHAVE, servir, contexto, vigiar, ir, lerProgresso, chromium } = require('./comum');
+const ref = JSON.parse(fs.readFileSync(path.join(__dirname, 'referencia', 'progresso-gerado.json'), 'utf8')).v1;
+const falhas = []; let oks = 0;
+const conferir = (c, m) => { c ? oks++ : falhas.push(m); console.log((c ? 'ok    ' : 'FALHA ') + m); };
+
+(async () => {
+  const srv = await servir(), nav = await chromium.launch(), erros = [];
+  const abrir = async (op = {}, comProgresso = false) => {
+    const c = await contexto(nav, op), pg = await c.newPage(); vigiar(pg, erros);
+    if (comProgresso) await c.addInitScript(([k, v]) => { if (!localStorage.getItem(k)) localStorage.setItem(k, v); }, [CHAVE, ref]);
+    await pg.goto(srv.base + '/#inicio'); await pg.waitForSelector('.cartao');
+    return pg;
+  };
+  const focoEm = (pg, s) => pg.evaluate(s => { const a = document.activeElement; return !!a && a.matches(s); }, s);
+
+  // Alternativa marcada: o leitor de tela precisa saber qual é.
+  {
+    const pg = await abrir();
+    await ir(pg, 'questoes');
+    const q = await pg.$eval('article.q', e => e.id.slice(2)), g = await pg.evaluate(i => QUEST[i].ans, q);
+    const alt = v => `[data-a="marcar"][data-q="${q}"][data-v="${v}"]`, tes = v => `[data-a="riscar"][data-q="${q}"][data-v="${v}"]`;
+    conferir(await pg.getAttribute(alt(g), 'aria-pressed') === 'false', 'alternativa começa sem marcação anunciada');
+    await pg.click(alt(g));
+    conferir(await pg.getAttribute(alt(g), 'aria-pressed') === 'true', 'alternativa marcada anuncia aria-pressed=true');
+    conferir(await pg.getAttribute(alt((g + 1) % 4), 'aria-pressed') === 'false', 'as outras alternativas anunciam aria-pressed=false');
+    await pg.click(tes((g + 1) % 4));
+    conferir(await pg.getAttribute(tes((g + 1) % 4), 'aria-pressed') === 'true', 'alternativa riscada anuncia o estado');
+    await pg.click(`[data-a="responder"][data-v="${q}"]`);
+    conferir((await pg.textContent(alt(g))).includes('sua resposta'), 'depois de responder, a sua resposta é dita em texto');
+    conferir((await pg.textContent(alt(g))).includes('gabarito'), 'depois de responder, o gabarito é dito em texto');
+    await pg.click('[data-a="perfil"][data-v="esposa"]'); await pg.waitForSelector('#trilha-sel');
+    await pg.selectOption('#trilha-sel', 'cgu-aud'); await ir(pg, 'questoes');
+    const ce = await pg.$eval('article.q', e => e.id.slice(2));
+    await pg.click(`[data-a="marcar"][data-q="${ce}"][data-v="true"]`);
+    conferir(await pg.getAttribute(`[data-a="marcar"][data-q="${ce}"][data-v="true"]`, 'aria-pressed') === 'true', 'Certo ou Errado anuncia a marcação');
+    await ir(pg, 'simulados'); await pg.click('[data-a="sim-novo"]'); await pg.waitForSelector('#relogio');
+    await pg.click('[data-a="sim-marca"][data-v="true"]');
+    conferir(await pg.getAttribute('[data-a="sim-marca"][data-v="true"]', 'aria-pressed') === 'true', 'simulado de Certo ou Errado anuncia a marcação');
+    await pg.click('[data-a="perfil"][data-v="rodrigo"]'); await pg.waitForSelector('.cartao');
+    await ir(pg, 'simulados'); await pg.click('[data-a="sim-novo"][data-v="rapido"]'); await pg.waitForSelector('#relogio');
+    await pg.click('[data-a="sim-marca"][data-v="1"]');
+    conferir(await pg.getAttribute('[data-a="sim-marca"][data-v="1"]', 'aria-pressed') === 'true', 'simulado de múltipla escolha anuncia a marcação');
+    conferir(await pg.getAttribute('[data-a="sim-marca"][data-v="0"]', 'aria-pressed') === 'false', 'simulado anuncia as não marcadas');
+    await pg.click('[data-a="sim-risca"][data-v="2"]');
+    conferir(await pg.getAttribute('[data-a="sim-risca"][data-v="2"]', 'aria-pressed') === 'true', 'simulado anuncia a alternativa riscada');
+    await pg.context().close();
+  }
+
+  // FIM
+  conferir(erros.length === 0, 'nenhum erro no console: ' + (erros.join(' | ') || 'zero'));
+  await nav.close(); srv.fechar();
+  console.log(`\n${oks} ok, ${falhas.length} falhas`);
+  process.exit(falhas.length ? 1 : 0);
+})().catch(e => { console.error(e); process.exit(2); });

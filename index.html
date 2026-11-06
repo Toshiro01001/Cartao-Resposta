@@ -187,6 +187,7 @@ code{font-family:var(--f-mono);font-size:.88em;background:var(--linha2);padding:
 .q{background:var(--folha);border:1px solid var(--linha);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:11px;min-width:0}
 .q-topo{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
 .q-topo .icone{margin-left:auto}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 .q-topo .chip{white-space:normal;overflow-wrap:anywhere;max-width:100%}
 .enun{white-space:pre-wrap;overflow-wrap:anywhere}
 .alts{display:flex;flex-direction:column;gap:4px}
@@ -579,11 +580,11 @@ function cardQ(q,modo){
       const risc=(r.risc||[]).includes(i);
       let c='alt';if(r.m===i)c+=' marcada';if(risc)c+=' riscada';
       if(reso){c+=' trava';if(i===q.ans)c+=' ok';else if(r.m===i)c+=' no'}
-      return `<div class="${c}"><button class="alt-bt" data-a="marcar" data-q="${q.id}" data-v="${i}" ${reso?'disabled':''}><span class="bol">${'ABCDE'[i]}</span><span class="alt-tx">${txt(al)}</span></button>${reso?'<span></span>':`<button class="tesoura" data-a="riscar" data-q="${q.id}" data-v="${i}" aria-label="Riscar alternativa ${'ABCDE'[i]}" title="Riscar alternativa">${svg('tesoura')}</button>`}</div>`;
+      return `<div class="${c}"><button class="alt-bt" data-a="marcar" data-q="${q.id}" data-v="${i}" aria-pressed="${r.m===i}" ${reso?'disabled':''}><span class="bol">${'ABCDE'[i]}</span><span class="alt-tx">${txt(al)}${risc?'<span class="sr"> (riscada)</span>':''}${reso&&r.m===i?'<span class="sr"> (sua resposta)</span>':''}${reso&&i===q.ans?'<span class="sr"> (gabarito)</span>':''}</span></button>${reso?'<span></span>':`<button class="tesoura" data-a="riscar" data-q="${q.id}" data-v="${i}" aria-pressed="${risc}" aria-label="Riscar alternativa ${'ABCDE'[i]}" title="Riscar alternativa">${svg('tesoura')}</button>`}</div>`;
     }).join('')}</div>`;
   } else {
     const op=[[true,'C','Certo'],[false,'E','Errado']];
-    corpo=`<div class="ce">${op.map(([v,l,n])=>{let c='';if(r.m===v)c='marcada';if(reso){if(v===q.ans)c='ok';else if(r.m===v)c='no'}return `<button class="${c}" data-a="marcar" data-q="${q.id}" data-v="${v}" ${reso?'disabled':''}><span class="bol" ${r.m===v&&!reso?'style="background:var(--caneta);border-color:var(--caneta);color:var(--sobre-caneta)"':''}>${l}</span>${n}</button>`}).join('')}</div>`;
+    corpo=`<div class="ce">${op.map(([v,l,n])=>{let c='';if(r.m===v)c='marcada';if(reso){if(v===q.ans)c='ok';else if(r.m===v)c='no'}return `<button class="${c}" data-a="marcar" data-q="${q.id}" data-v="${v}" aria-pressed="${r.m===v}" ${reso?'disabled':''}><span class="bol" ${r.m===v&&!reso?'style="background:var(--caneta);border-color:var(--caneta);color:var(--sobre-caneta)"':''}>${l}</span>${n}${reso&&r.m===v?'<span class="sr"> (sua resposta)</span>':''}${reso&&v===q.ans?'<span class="sr"> (gabarito)</span>':''}</button>`}).join('')}</div>`;
   }
   const rodape=reso?`<div class="com"><span class="veredito ${r.m===q.ans?'ok':'no'}">${r.m===q.ans?'Você acertou.':`Você errou. Gabarito: ${q.tipo==='mc'?'ABCDE'[q.ans]:(q.ans?'Certo':'Errado')}.`}</span><div>${txt(q.com)}</div><div class="peq mudo">Fonte: ${txt(q.ref)}</div>${AULA[q.aula]?`<a class="peq" href="#aula-${q.aula}">Estudar esta aula: ${esc(AULA[q.aula].titulo)}</a>`:''}</div>`:`<div><button class="bt" data-a="responder" data-v="${q.id}" ${r.m===undefined?'disabled':''}>Responder</button></div>`;
   return `<article class="q" id="q-${q.id}">${topo}<div class="enun">${esc(q.enun)}</div>${corpo}${rodape}</article>`;
@@ -709,8 +710,8 @@ function vSimAtivo(){
   const s=P().sim;if(!s)return `<div class="folha pilha"><p>Nenhum simulado em andamento.</p><a class="bt" href="#simulados">Escolher um simulado</a></div>`;
   const i=Math.min(s.i||0,s.qs.length-1),q=QUEST[s.qs[i]],m=s.r[q.id];
   let opc='';
-  if(q.tipo==='mc')opc=`<div class="alts">${q.alts.map((al,j)=>{const risc=(s.risc[q.id]||[]).includes(j);return `<div class="alt ${m===j?'marcada':''} ${risc?'riscada':''}"><button class="alt-bt" data-a="sim-marca" data-v="${j}"><span class="bol">${'ABCDE'[j]}</span><span class="alt-tx">${txt(al)}</span></button><button class="tesoura" data-a="sim-risca" data-v="${j}" aria-label="Riscar alternativa ${'ABCDE'[j]}" title="Riscar alternativa">${svg('tesoura')}</button></div>`}).join('')}</div>`;
-  else opc=`<div class="ce">${[[true,'C','Certo'],[false,'E','Errado']].map(([v,l,n])=>`<button class="${m===v?'marcada':''}" data-a="sim-marca" data-v="${v}"><span class="bol" ${m===v?'style="background:var(--caneta);border-color:var(--caneta);color:var(--sobre-caneta)"':''}>${l}</span>${n}</button>`).join('')}</div>`;
+  if(q.tipo==='mc')opc=`<div class="alts">${q.alts.map((al,j)=>{const risc=(s.risc[q.id]||[]).includes(j);return `<div class="alt ${m===j?'marcada':''} ${risc?'riscada':''}"><button class="alt-bt" data-a="sim-marca" data-v="${j}" aria-pressed="${m===j}"><span class="bol">${'ABCDE'[j]}</span><span class="alt-tx">${txt(al)}${risc?'<span class="sr"> (riscada)</span>':''}</span></button><button class="tesoura" data-a="sim-risca" data-v="${j}" aria-pressed="${risc}" aria-label="Riscar alternativa ${'ABCDE'[j]}" title="Riscar alternativa">${svg('tesoura')}</button></div>`}).join('')}</div>`;
+  else opc=`<div class="ce">${[[true,'C','Certo'],[false,'E','Errado']].map(([v,l,n])=>`<button class="${m===v?'marcada':''}" data-a="sim-marca" data-v="${v}" aria-pressed="${m===v}"><span class="bol" ${m===v?'style="background:var(--caneta);border-color:var(--caneta);color:var(--sobre-caneta)"':''}>${l}</span>${n}</button>`).join('')}</div>`;
   const grade=s.qs.map((id,k)=>{const qq=QUEST[id],v=s.r[id];const tem=v!==undefined&&v!==null;const lt=!tem?'':qq.tipo==='mc'?'ABCDE'[v]:(v?'C':'E');return `<button class="${tem?'res':''} ${k===i?'atual':''}" data-a="sim-ir" data-v="${k}" aria-label="Questão ${k+1}${tem?', marcada '+lt:', em branco'}"><i>${lt}</i>${k+1}</button>`}).join('');
   const feitas=s.qs.filter(id=>s.r[id]!==undefined&&s.r[id]!==null).length;
   return `<div class="pilha" style="gap:14px"><div class="fila entre"><h1 style="font-size:1.7rem">${esc(s.nome)}</h1><button class="bt cinza mini" data-a="sim-pausa">${s.pausa!==undefined&&s.pausa!==null?'Retomar relógio':'Pausar relógio'}</button></div>
