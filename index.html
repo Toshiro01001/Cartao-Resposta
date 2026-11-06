@@ -425,7 +425,7 @@ function moldura(rota){
   const perfis=Object.entries(S.perfis).map(([k,v])=>`<button data-a="perfil" data-v="${k}" aria-pressed="${k===S.atual}">${esc(v.nome)}</button>`).join('');
   const sel=p.trilhas.length>1?`<select class="sel" id="trilha-sel" aria-label="Concurso">${p.trilhas.map(t=>`<option value="${t}" ${t===p.trilha?'selected':''}>${esc(TRILHAS[t].curto)}</option>`).join('')}</select>`:`<span class="peq mudo">${esc(T().curto)}</span>`;
   return `<div class="app"><aside class="lado"><a href="#inicio" class="marca-site" style="text-decoration:none;color:inherit"><i></i>Cartão-Resposta</a><nav class="nav" aria-label="Principal">${nav}</nav><div class="lado-pe"><button class="bt cinza mini" data-a="tema">${svg('lua').replace('<svg','<svg style="width:15px;height:15px"')}Trocar tema</button></div></aside>
-  <div style="min-width:0"><header class="topo"><a href="#inicio" class="marca-site" style="text-decoration:none;color:inherit"><i></i></a><div class="perfis" role="group" aria-label="Quem está estudando">${perfis}</div>${sel}</header><main class="conteudo" id="main"></main></div>
+  <div style="min-width:0"><header class="topo"><a href="#inicio" class="marca-site" style="text-decoration:none;color:inherit" aria-label="Cartão-Resposta: ir para o início"><i></i></a><div class="perfis" role="group" aria-label="Quem está estudando">${perfis}</div>${sel}</header><main class="conteudo" id="main"></main></div>
   <nav class="baixo" aria-label="Principal">${baixo}</nav></div>`;
 }
 function ativo(rota,r){return rota===r||(r==='aulas'&&rota.startsWith('aula-'))||(r==='simulados'&&rota.startsWith('simulado'))||(r==='discursivas'&&rota.startsWith('disc-'))}
@@ -578,7 +578,7 @@ function cardQ(q,modo){
       const risc=(r.risc||[]).includes(i);
       let c='alt';if(r.m===i)c+=' marcada';if(risc)c+=' riscada';
       if(reso){c+=' trava';if(i===q.ans)c+=' ok';else if(r.m===i)c+=' no'}
-      return `<div class="${c}"><button class="alt-bt" data-a="marcar" data-q="${q.id}" data-v="${i}" ${reso?'disabled':''} aria-label="Alternativa ${'ABCDE'[i]}"><span class="bol">${'ABCDE'[i]}</span><span class="alt-tx">${txt(al)}</span></button>${reso?'<span></span>':`<button class="tesoura" data-a="riscar" data-q="${q.id}" data-v="${i}" aria-label="Riscar alternativa ${'ABCDE'[i]}" title="Riscar alternativa">${svg('tesoura')}</button>`}</div>`;
+      return `<div class="${c}"><button class="alt-bt" data-a="marcar" data-q="${q.id}" data-v="${i}" ${reso?'disabled':''}><span class="bol">${'ABCDE'[i]}</span><span class="alt-tx">${txt(al)}</span></button>${reso?'<span></span>':`<button class="tesoura" data-a="riscar" data-q="${q.id}" data-v="${i}" aria-label="Riscar alternativa ${'ABCDE'[i]}" title="Riscar alternativa">${svg('tesoura')}</button>`}</div>`;
     }).join('')}</div>`;
   } else {
     const op=[[true,'C','Certo'],[false,'E','Errado']];
@@ -708,7 +708,7 @@ function vSimAtivo(){
   const s=P().sim;if(!s)return `<div class="folha pilha"><p>Nenhum simulado em andamento.</p><a class="bt" href="#simulados">Escolher um simulado</a></div>`;
   const i=Math.min(s.i||0,s.qs.length-1),q=QUEST[s.qs[i]],m=s.r[q.id];
   let opc='';
-  if(q.tipo==='mc')opc=`<div class="alts">${q.alts.map((al,j)=>{const risc=(s.risc[q.id]||[]).includes(j);return `<div class="alt ${m===j?'marcada':''} ${risc?'riscada':''}"><button class="alt-bt" data-a="sim-marca" data-v="${j}" aria-label="Alternativa ${'ABCDE'[j]}"><span class="bol">${'ABCDE'[j]}</span><span class="alt-tx">${txt(al)}</span></button><button class="tesoura" data-a="sim-risca" data-v="${j}" aria-label="Riscar alternativa ${'ABCDE'[j]}" title="Riscar alternativa">${svg('tesoura')}</button></div>`}).join('')}</div>`;
+  if(q.tipo==='mc')opc=`<div class="alts">${q.alts.map((al,j)=>{const risc=(s.risc[q.id]||[]).includes(j);return `<div class="alt ${m===j?'marcada':''} ${risc?'riscada':''}"><button class="alt-bt" data-a="sim-marca" data-v="${j}"><span class="bol">${'ABCDE'[j]}</span><span class="alt-tx">${txt(al)}</span></button><button class="tesoura" data-a="sim-risca" data-v="${j}" aria-label="Riscar alternativa ${'ABCDE'[j]}" title="Riscar alternativa">${svg('tesoura')}</button></div>`}).join('')}</div>`;
   else opc=`<div class="ce">${[[true,'C','Certo'],[false,'E','Errado']].map(([v,l,n])=>`<button class="${m===v?'marcada':''}" data-a="sim-marca" data-v="${v}"><span class="bol" ${m===v?'style="background:var(--caneta);border-color:var(--caneta);color:var(--sobre-caneta)"':''}>${l}</span>${n}</button>`).join('')}</div>`;
   const grade=s.qs.map((id,k)=>{const qq=QUEST[id],v=s.r[id];const tem=v!==undefined&&v!==null;const lt=!tem?'':qq.tipo==='mc'?'ABCDE'[v]:(v?'C':'E');return `<button class="${tem?'res':''} ${k===i?'atual':''}" data-a="sim-ir" data-v="${k}" aria-label="Questão ${k+1}${tem?', marcada '+lt:', em branco'}"><i>${lt}</i>${k+1}</button>`}).join('');
   const feitas=s.qs.filter(id=>s.r[id]!==undefined&&s.r[id]!==null).length;
