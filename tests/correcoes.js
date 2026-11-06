@@ -49,6 +49,19 @@ const conferir = (c, m) => { c ? oks++ : falhas.push(m); console.log((c ? 'ok   
     await pg.context().close();
   }
 
+  // Estados que eram só cor.
+  {
+    const pg = await abrir({}, true), r = JSON.parse(ref).perfis.rodrigo;
+    await ir(pg, 'aulas');
+    conferir((await pg.$$eval('.aula-l .sr', e => e.map(x => x.textContent))).filter(x => x.includes('Estudada')).length === Object.keys(r.vistas).length, 'lista de aulas diz em texto quais foram estudadas');
+    await ir(pg, 'aula-' + Object.keys(r.modOk)[0]);
+    conferir(await pg.$$eval('.mod-i .sr', e => e.length) === Object.keys(r.modOk[Object.keys(r.modOk)[0]]).length, 'módulos concluídos são ditos em texto');
+    await ir(pg, 'simulado-ativo');
+    conferir(!!(await pg.$('.grade-c [aria-current="true"]')), 'a questão atual do simulado tem aria-current');
+    conferir(await pg.getAttribute('#relogio', 'role') === 'timer', 'o relógio tem role=timer');
+    await pg.context().close();
+  }
+
   // FIM
   conferir(erros.length === 0, 'nenhum erro no console: ' + (erros.join(' | ') || 'zero'));
   await nav.close(); srv.fechar();

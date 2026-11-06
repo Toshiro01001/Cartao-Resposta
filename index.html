@@ -481,7 +481,7 @@ function vAulas(){
       const l=aulasDe(d.id).filter(a=>!tq||a.titulo.toLowerCase().includes(tq)||a.edital.toLowerCase().includes(tq)||d.nome.toLowerCase().includes(tq));
       if(!l.length)return '';
       const v=l.filter(a=>p.vistas[a.id]).length;
-      return `<section class="folha"><div class="disc-tit"><span>${esc(d.nome)}</span><span class="peq mudo num">${v} de ${l.length}</span></div><div style="margin-top:8px">${l.map(a=>{const nq=DB.questoes.filter(q=>q.aula===a.id).length;return `<a class="aula-l" href="#aula-${a.id}"><i class="vis ${p.vistas[a.id]?'on':''}"></i><strong>${esc(a.titulo)}${a.modulos?` <span class="chip">${a.modulos.length} módulos</span>`:''}</strong><span class="peq mudo num">${nq} ${nq===1?'questão':'questões'}</span></a>`}).join('')}</div></section>`;
+      return `<section class="folha"><div class="disc-tit"><span>${esc(d.nome)}</span><span class="peq mudo num">${v} de ${l.length}</span></div><div style="margin-top:8px">${l.map(a=>{const nq=DB.questoes.filter(q=>q.aula===a.id).length;return `<a class="aula-l" href="#aula-${a.id}"><i class="vis ${p.vistas[a.id]?'on':''}"></i><strong>${p.vistas[a.id]?'<span class="sr">Estudada: </span>':''}${esc(a.titulo)}${a.modulos?` <span class="chip">${a.modulos.length} módulos</span>`:''}</strong><span class="peq mudo num">${nq} ${nq===1?'questão':'questões'}</span></a>`}).join('')}</div></section>`;
     }).join('');
     return sec?`<div class="pilha"><h2>${esc(b)}</h2>${sec}</div>`:'';
   }).join('');
@@ -514,7 +514,7 @@ function vAulaLonga(a){
   p.ultAula=id;salvar();
   const feitos=M.filter((_,k)=>ok[k]).length,min=Math.max(1,Math.round(M.reduce((s,m)=>s+palavras(m.niveis[nv]),0)/170));
   const seg=Object.entries(NIVEIS).map(([k,v])=>`<button data-a="nivel" data-v="${k}" aria-pressed="${k===nv}" title="${esc(v.desc)}">${v.nome}</button>`).join('');
-  const trilha=M.map((m,k)=>`<button class="mod-i ${k===i?'atual':''} ${ok[k]?'feito':''}" data-a="mod-ir" data-q="${id}" data-v="${k}" ${k===i?'aria-current="step"':''}><span class="mod-n">${k+1}</span><span>${esc(m.tit)}</span></button>`).join('')+`<button class="mod-i ${i===M.length?'atual':''}" data-a="mod-ir" data-q="${id}" data-v="${M.length}"><span class="mod-n">${M.length+1}</span><span>Praticar e fechar a aula</span></button>`;
+  const trilha=M.map((m,k)=>`<button class="mod-i ${k===i?'atual':''} ${ok[k]?'feito':''}" data-a="mod-ir" data-q="${id}" data-v="${k}" ${k===i?'aria-current="step"':''}><span class="mod-n">${k+1}</span><span>${esc(m.tit)}${ok[k]?'<span class="sr"> (concluído)</span>':''}</span></button>`).join('')+`<button class="mod-i ${i===M.length?'atual':''}" data-a="mod-ir" data-q="${id}" data-v="${M.length}"><span class="mod-n">${M.length+1}</span><span>Praticar e fechar a aula</span></button>`;
   const irmas=aulasDe(a.disc),ix=irmas.indexOf(a),prx=irmas[ix+1];
   let meio;
   if(i<M.length){const m=M[i];
@@ -712,12 +712,12 @@ function vSimAtivo(){
   let opc='';
   if(q.tipo==='mc')opc=`<div class="alts">${q.alts.map((al,j)=>{const risc=(s.risc[q.id]||[]).includes(j);return `<div class="alt ${m===j?'marcada':''} ${risc?'riscada':''}"><button class="alt-bt" data-a="sim-marca" data-v="${j}" aria-pressed="${m===j}"><span class="bol">${'ABCDE'[j]}</span><span class="alt-tx">${txt(al)}${risc?'<span class="sr"> (riscada)</span>':''}</span></button><button class="tesoura" data-a="sim-risca" data-v="${j}" aria-pressed="${risc}" aria-label="Riscar alternativa ${'ABCDE'[j]}" title="Riscar alternativa">${svg('tesoura')}</button></div>`}).join('')}</div>`;
   else opc=`<div class="ce">${[[true,'C','Certo'],[false,'E','Errado']].map(([v,l,n])=>`<button class="${m===v?'marcada':''}" data-a="sim-marca" data-v="${v}" aria-pressed="${m===v}"><span class="bol" ${m===v?'style="background:var(--caneta);border-color:var(--caneta);color:var(--sobre-caneta)"':''}>${l}</span>${n}</button>`).join('')}</div>`;
-  const grade=s.qs.map((id,k)=>{const qq=QUEST[id],v=s.r[id];const tem=v!==undefined&&v!==null;const lt=!tem?'':qq.tipo==='mc'?'ABCDE'[v]:(v?'C':'E');return `<button class="${tem?'res':''} ${k===i?'atual':''}" data-a="sim-ir" data-v="${k}" aria-label="Questão ${k+1}${tem?', marcada '+lt:', em branco'}"><i>${lt}</i>${k+1}</button>`}).join('');
+  const grade=s.qs.map((id,k)=>{const qq=QUEST[id],v=s.r[id];const tem=v!==undefined&&v!==null;const lt=!tem?'':qq.tipo==='mc'?'ABCDE'[v]:(v?'C':'E');return `<button class="${tem?'res':''} ${k===i?'atual':''}" data-a="sim-ir" data-v="${k}" ${k===i?'aria-current="true"':''} aria-label="Questão ${k+1}${tem?', marcada '+lt:', em branco'}"><i>${lt}</i>${k+1}</button>`}).join('');
   const feitas=s.qs.filter(id=>s.r[id]!==undefined&&s.r[id]!==null).length;
   return `<div class="pilha" style="gap:14px"><div class="fila entre"><h1 style="font-size:1.7rem">${esc(s.nome)}</h1><button class="bt cinza mini" data-a="sim-pausa">${s.pausa!==undefined&&s.pausa!==null?'Retomar relógio':'Pausar relógio'}</button></div>
   <div class="sim-layout"><div class="pilha"><div class="q"><div class="q-topo"><span class="chip num">Questão ${i+1} de ${s.qs.length}</span><span class="chip">${esc(DISC[q.disc].nome)}</span><span class="chip num">${n2(ptsQ(q,s.trilha))} ${ptsQ(q,s.trilha)===1?'ponto':'pontos'}</span></div><div class="enun">${esc(q.enun)}</div>${opc}${m!==undefined&&m!==null?`<div><button class="bt cinza mini" data-a="sim-limpa">Deixar em branco</button></div>`:''}</div>
   <div class="fila entre"><button class="bt cinza" data-a="sim-ir" data-v="${i-1}" ${i<1?'disabled':''}>Anterior</button><button class="bt" data-a="sim-ir" data-v="${i+1}" ${i>=s.qs.length-1?'disabled':''}>Próxima</button></div></div>
-  <aside class="folha sim-painel pilha"><div class="relogio" id="relogio">0:00:00</div><p class="peq mudo num">${feitas} de ${s.qs.length} marcadas</p><div class="grade-c">${grade}</div><button class="bt" data-a="sim-fim">Entregar prova</button></aside></div></div>`;
+  <aside class="folha sim-painel pilha"><div class="relogio" id="relogio" role="timer" aria-label="Tempo restante">0:00:00</div><p class="peq mudo num">${feitas} de ${s.qs.length} marcadas</p><div class="grade-c">${grade}</div><button class="bt" data-a="sim-fim">Entregar prova</button></aside></div></div>`;
 }
 let tick;
 function iniciaRelogio(){
