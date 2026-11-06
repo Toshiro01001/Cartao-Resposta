@@ -929,7 +929,7 @@ document.addEventListener('click',e=>{
       const mod=modelosDe(trilha()).find(m=>m.id===v);
       const go=()=>{const qs=montar(trilha(),mod);if(!qs.length){toast('Ainda não há questões nesta trilha.');return}
         p.sim={trilha:trilha(),mod:mod.id,nome:mod.n,qs,r:{},risc:{},i:0,fim:Date.now()+mod.min*60000,pausa:null};salvar();location.hash='simulado-ativo';};
-      if(p.sim&&p.sim.trilha===trilha())perguntar('Trocar de simulado?','Já existe um simulado em andamento. Começar outro apaga as marcações dele.','Começar outro',go);else go();
+      if(p.sim)perguntar('Trocar de simulado?',`Já existe um simulado em andamento (${p.sim.nome}, ${TRILHAS[p.sim.trilha].curto}). Começar outro apaga as marcações dele.`,'Começar outro',go);else go();
       break}
     case 'sim-marca':{const s=p.sim,q=QUEST[s.qs[s.i]];s.r[q.id]=q.tipo==='mc'?Number(v):v==='true';salvar();mantemScroll(render);break}
     case 'sim-limpa':{const s=p.sim;delete s.r[s.qs[s.i]];salvar();mantemScroll(render);break}

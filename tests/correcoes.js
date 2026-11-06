@@ -167,6 +167,21 @@ const conferir = (c, m) => { c ? oks++ : falhas.push(m); console.log((c ? 'ok   
     await pc.context().close();
   }
 
+  // Simulado em andamento em outro concurso não pode ser apagado sem aviso.
+  {
+    const pg = await abrir();
+    await pg.click('[data-a="perfil"][data-v="esposa"]'); await pg.waitForSelector('#trilha-sel');
+    await pg.selectOption('#trilha-sel', 'cgu-aud'); await ir(pg, 'simulados');
+    await pg.click('[data-a="sim-novo"][data-v="rapido"]'); await pg.waitForSelector('#relogio');
+    await pg.click('[data-a="sim-marca"][data-v="true"]');
+    await pg.selectOption('#trilha-sel', 'cam-al'); await ir(pg, 'simulados');
+    await pg.click('[data-a="sim-novo"][data-v="rapido"]');
+    conferir(!!(await pg.$('.modal')), 'começar simulado em outro concurso pede confirmação');
+    await pg.click('#m-nao');
+    conferir(await pg.evaluate(() => P().sim.trilha === 'cgu-aud' && Object.keys(P().sim.r).length === 1), 'desistir mantém o simulado e as marcações');
+    await pg.context().close();
+  }
+
   // FIM
   conferir(erros.length === 0, 'nenhum erro no console: ' + (erros.join(' | ') || 'zero'));
   await nav.close(); srv.fechar();
