@@ -895,7 +895,7 @@ function render(){
   else h=vInicio();
   m.innerHTML=h;
   if(rota==='simulado-ativo')iniciaRelogio();
-  if(rota.startsWith('disc-'))notaDisc(rota.slice(5));
+  if(rota.startsWith('disc-')){const g=P().disc[rota.slice(5)];if(g&&g.ver)notaDisc(rota.slice(5))}
   document.title='Cartão-Resposta';
   const tp=$('.topo');if(tp)document.documentElement.style.setProperty('--topo-h',tp.offsetHeight+'px');
   document.querySelectorAll('#main .tab-rola,#main pre').forEach(e=>{if(e.scrollWidth>e.clientWidth+1){e.tabIndex=0;e.setAttribute('role','region');e.setAttribute('aria-label','Conteúdo com rolagem lateral')}});

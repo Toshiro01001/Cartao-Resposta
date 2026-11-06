@@ -182,6 +182,19 @@ const conferir = (c, m) => { c ? oks++ : falhas.push(m); console.log((c ? 'ok   
     await pg.context().close();
   }
 
+  // Rascunho de discursiva continua sendo rascunho ao abrir de novo.
+  {
+    const pg = await abrir();
+    const d = await pg.evaluate(() => DB.discursivas.find(x => x.trilha === 'cam-ti').id);
+    await ir(pg, 'disc-' + d); await pg.fill('#redacao', 'Rascunho.');
+    await ir(pg, 'discursivas'); await ir(pg, 'disc-' + d); await ir(pg, 'discursivas');
+    conferir((await pg.textContent('#main')).includes('Rascunho salvo'), 'rascunho reaberto não vira autoavaliação de 0 pontos');
+    await ir(pg, 'disc-' + d); await pg.click('[data-a="d-ver"]'); await pg.check('[data-esp="0"]');
+    await ir(pg, 'discursivas');
+    conferir((await pg.textContent('#main')).includes('Autoavaliação'), 'depois de corrigir, a autoavaliação aparece');
+    await pg.context().close();
+  }
+
   // FIM
   conferir(erros.length === 0, 'nenhum erro no console: ' + (erros.join(' | ') || 'zero'));
   await nav.close(); srv.fechar();
