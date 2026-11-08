@@ -269,6 +269,8 @@ textarea.redacao{width:100%;min-height:380px;background:var(--folha);border:1px 
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(70px + env(safe-area-inset-bottom,0px));background:var(--tinta);color:var(--folha);padding:8px 16px;border-radius:7px;z-index:30;font-size:.92rem;max-width:90vw}
 @media (min-width:821px){.toast{bottom:24px}}
 .so-tela{}
+.det-tec summary{cursor:pointer;color:var(--caneta);font-weight:700;min-height:44px;display:flex;align-items:center}
+.det-tec ul{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -490,7 +492,23 @@ function vInicio(){
     <div class="legenda"><span><i class="b"></i>Não respondida</span><span><i class="b ok"></i>Acertou por último</span><span><i class="b no"></i>Errou por último</span></div>
   </section>
   <div class="dupla"><section class="folha pilha"><h2>Próximos prazos</h2><div>${prazos||`<p class="mudo">${T().semData?'Ainda não há datas. Vou precisar do edital novo para incluí-las.':'Sem prazos futuros.'}</p>`}</div></section>
-  <section class="folha pilha"><h2>${T().semData?'Por onde começar':'Plano até 13/12'}</h2><div>${plano}</div><p class="peq mudo">${T().semData?'A ordem é uma sugestão. As provas de 13/12 continuam sendo a prioridade.':t.startsWith('cgu')?'A P3 vale 180 dos 260 pontos das objetivas, por isso vem primeiro.':'Os Conhecimentos Específicos valem 70 dos 100 pontos da objetiva, por isso vêm primeiro.'}</p></section></div></div>`;
+  <section class="folha pilha"><h2>${T().semData?'Por onde começar':'Plano até 13/12'}</h2><div>${plano}</div><p class="peq mudo">${T().semData?'A ordem é uma sugestão. As provas de 13/12 continuam sendo a prioridade.':t.startsWith('cgu')?'A P3 vale 180 dos 260 pontos das objetivas, por isso vem primeiro.':'Os Conhecimentos Específicos valem 70 dos 100 pontos da objetiva, por isso vêm primeiro.'}</p></section></div>
+  ${sobreSite()}</div>`;
+}
+/* Explica o site para quem chega pela primeira vez. Fica no fim do Início para não atrapalhar quem estuda todo dia. */
+function sobreSite(){
+  return `<section class="folha pilha" aria-labelledby="sobre-tit"><h2 id="sobre-tit">Sobre este site</h2>
+  <p>O Cartão-Resposta é um site de estudo para concurso público, feito pela Mil e Uma Linhas! para duas pessoas que estudam de verdade para provas marcadas. Ele reúne aulas, questões comentadas, simulados e treino de redação, e guarda o progresso no próprio aparelho, sem login e sem cobrança.</p>
+  <p>Como usar: escolha no topo quem está estudando e, se houver mais de um, o concurso. Em <strong>Aulas</strong> você estuda e troca a forma de explicar entre quatro níveis. Em <strong>Questões</strong> você responde e vê o comentário. Em <strong>Simulados</strong> você faz uma prova cronometrada, corrigida com as regras do edital. As bolinhas do cartão-resposta acima mostram o que já foi feito.</p>
+  <p class="peq mudo">O conteúdo foi escrito com inteligência artificial a partir dos editais e pode conter erros. Confie sempre no edital e no texto da lei, como explica a aba Editais e provas.</p>
+  <details class="det-tec"><summary>Detalhes técnicos (para quem programa)</summary><ul class="peq">
+    <li>O site inteiro cabe em um único arquivo, <code>index.html</code>, com cerca de 2 MB, em HTML, CSS e JavaScript puros, sem framework, sem build e sem servidor. É publicado no GitHub Pages.</li>
+    <li>Uma única função desenha a tela conforme a âncora do endereço (a parte depois do <code>#</code>, como <code>#questoes</code>), e o foco é devolvido ao elemento certo depois de cada redesenho, para teclado e leitor de tela.</li>
+    <li>O progresso de cada perfil é um objeto JSON salvo no <code>localStorage</code> do navegador. O código de progresso é esse mesmo JSON: ao colar em outro aparelho, as respostas mais recentes prevalecem.</li>
+    <li>A nota do simulado é calculada no navegador com as regras de cada edital: pesos por área, desconto por erro e mínimos.</li>
+    <li>Um service worker (<code>sw.js</code>) guarda uma cópia da página para abrir sem internet. Com internet, a página sempre vem da rede, então nenhuma versão antiga fica presa.</li>
+    <li>Testes automatizados com Playwright na pasta <code>tests</code>: percurso em três tamanhos de tela, regressão do formato do progresso, correções de acessibilidade, uso sem internet e auditoria com axe-core.</li>
+  </ul></details></section>`;
 }
 function saudacao(){const h=new Date().getHours();return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite'}
 function linhaCartao(d){
@@ -828,7 +846,7 @@ function vDesempenho(){
   <section class="folha pilha"><h2>Questões por dia, últimos 14 dias</h2><div class="dias14" role="img" aria-label="Questões respondidas por dia">${dias.map(d=>`<div title="${dBR(d.k)}: ${d.r}"><span class="num">${d.r||''}</span><i style="height:${Math.round(d.r/mx*62)}px"></i><span>${d.l}</span></div>`).join('')}</div></section>
   <section class="folha pilha"><h2>Vocês dois</h2><div class="tab-rola"><table class="tab"><thead><tr><th>Perfil</th><th>Respondidas</th><th>Acerto</th><th>Aulas</th><th>Simulados</th></tr></thead><tbody>${comp}</tbody></table></div><p class="peq mudo">Cada aparelho guarda só o que foi feito nele. Para somar o progresso de dois aparelhos, copie o código em um e cole no outro.</p></section>
   <section class="folha pilha"><h2>Guardar ou levar o progresso</h2>
-    <p class="peq mudo">O progresso fica neste navegador. Limpar os dados do navegador apaga tudo, então guarde uma cópia de vez em quando.</p>
+    <p class="peq mudo">O progresso fica neste navegador. Limpar os dados do navegador apaga tudo, então guarde uma cópia de vez em quando. O código de progresso é um texto com tudo o que você já fez: copie aqui e cole no outro aparelho, ou baixe como arquivo.</p>
     <div class="fila"><button class="bt sec" data-a="exp-copia">Copiar código de progresso</button><button class="bt cinza" data-a="exp-arq">Baixar arquivo</button><label class="bt cinza" style="cursor:pointer">Abrir arquivo<input type="file" id="imp-arq" class="sr" accept=".json,application/json"></label></div>
     <label class="campo" for="imp-tx">Colar código de outro aparelho</label><textarea class="cx" id="imp-tx" placeholder="Cole aqui o código copiado"></textarea>
     <div class="fila"><button class="bt cinza" data-a="imp-cola">Juntar este progresso</button><button class="bt cinza" data-a="zerar" style="color:var(--errado)">Apagar o progresso de ${esc(p.nome)}</button></div></section></div>`;
