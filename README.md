@@ -2,9 +2,17 @@
 
 ![Lista de questões do Cartão Resposta](docs/tela.webp)
 
-Fiz esta plataforma de estudos para concursos públicos, com aulas em quatro níveis de ensino, banco de questões comentadas, simulados pontuados pelas regras dos editais e treino de discursiva.
+Fiz este site para estudar para concurso público, junto com a Alice. Ele junta em um só lugar o que a gente precisa: aulas que explicam o mesmo conteúdo de quatro jeitos, questões com comentário, simulados corrigidos com as regras do edital e treino de redação. Tudo fica guardado no próprio aparelho, sem login e sem cobrança. Também é uma amostra do que a Mil e Uma Linhas! sabe fazer.
 
 O sistema inteiro cabe em um único arquivo, `index.html`. Não precisa de servidor, instalação nem login, e funciona no computador e no celular. Depois da primeira visita, abre também sem internet.
+
+## Como usar
+
+1. Abra o site e escolha, no topo, quem está estudando.
+2. Se o perfil tiver mais de um concurso, escolha o concurso ao lado do nome.
+3. Siga o plano do Início, estude pelas Aulas e pratique em Questões. As bolinhas do cartão-resposta mostram o que já foi feito: azul é acerto, vermelha é erro e vazia é o que falta.
+4. Faça um simulado por semana e revise os erros que o sistema trouxer de volta.
+5. Em Desempenho, copie o código de progresso de vez em quando para não perder nada e para levar o estudo a outro aparelho.
 
 ## Concursos atendidos
 
@@ -67,16 +75,9 @@ Acerto por disciplina, questões por dia, comparação entre os perfis e cópia 
 ### Editais e provas
 Links para editais, provas anteriores, situação dos concursos e leis para leitura.
 
-## Como usar
-
-1. Abra o site e escolha o perfil no topo.
-2. Selecione o concurso, quando houver mais de um.
-3. Siga o plano do Início, estude pelas Aulas e pratique em Questões.
-4. Faça um simulado por semana e revise os erros que o sistema trouxer de volta.
-
 ## Onde o progresso fica salvo
 
-O progresso fica no `localStorage` do navegador, separado por perfil. Não há conta nem sincronização automática.
+O progresso fica guardado no próprio navegador (no `localStorage`, um espaço que cada site tem para salvar dados no aparelho), separado por perfil. Não há conta nem sincronização automática.
 
 - Cada aparelho e cada navegador guardam o próprio progresso.
 - Limpar os dados do navegador apaga tudo.
@@ -96,7 +97,7 @@ Para atualizar, substitua o `index.html`. O progresso salvo no navegador continu
 - HTML, CSS e JavaScript puros, sem framework e sem etapa de build no repositório.
 - Todo o conteúdo fica embutido no `index.html`, com cerca de 2 MB.
 - As fontes vêm do Google Fonts sem bloquear a abertura, com fontes do sistema como alternativa.
-- `sw.js` guarda uma cópia do site para uso sem internet. Com internet, a página sempre vem da rede, então uma versão nova aparece na primeira visita.
+- `sw.js` é um service worker (um pequeno programa que o navegador roda ao lado do site) e guarda uma cópia do site para uso sem internet. Com internet, a página sempre vem da rede, então uma versão nova aparece na primeira visita.
 - `tests/` traz os testes automatizados, feitos com Playwright e fora do que o site carrega.
 - Tema claro e escuro, layout adaptado ao celular e navegação por âncoras na URL.
 
